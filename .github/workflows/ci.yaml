@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-12
+
+    steps:
+      - name: Checkout self
+        uses: actions/checkout@v4
+        with:
+          path: opentelemetry-swift-packages
+
+      - name: Checkout opentelemetry-swift
+        uses: actions/checkout@v4
+        with:
+          repository: open-telemetry/opentelemetry-swift
+          path: opentelemetry-swift
+          ref: main
+
+      - name: Build
+        working-directory: ./opentelemetry-swift-packages
+        run: |
+          ./scripts/build.sh --source ../opentelemetry-swift --target OpenTelemetryApi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenTelemetryApi.xcframework
+          path: ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
+          if-no-files-found: error
