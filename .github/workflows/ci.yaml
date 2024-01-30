@@ -23,6 +23,8 @@ jobs:
           repository: open-telemetry/opentelemetry-swift
           path: opentelemetry-swift
           ref: main
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Build
         working-directory: ./opentelemetry-swift-packages
@@ -33,5 +35,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OpenTelemetryApi.xcframework
-          path: ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
+          path: |
+            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
+            ./opentelemetry-swift-packages/artifacts/release_notes.md
           if-no-files-found: error

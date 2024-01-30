@@ -3,12 +3,14 @@
 set -e
 
 source="../opentelemetry-swift"
+github_url="https://github.com/open-telemetry/opentelemetry-swift"
 target="OpenTelemetryApi"
 
 # Usage function
 function usage() {
     echo "Usage: $0 [-s <source>] [-t <target>]"
     echo "  -s, --source    Specify the source directory"
+    echo "  -g, --github    Specify the github url"
     echo "  -t, --target    Specify the target directory"
     echo "  -h, --help      Display this help message"
     exit 0
@@ -23,6 +25,10 @@ while (( "$#" )); do
                 ;;
         -t|--target)
                 target="$2"
+                shift 2
+                ;;
+        -g|--github)
+                github_url="$2"
                 shift 2
                 ;;
         -h|--help)
@@ -113,6 +119,36 @@ function compress() {
     echo "Done zipping $scheme.xcframework"
 }
 
+# Writes the source information to given file file
+# It includes the git commit hash and tag name
+function create_version_info() {
+    file=$1
+
+    echo "Removing version info $file"
+    rm -rf $file
+
+    pushd $source
+    # git describe can fail if there are no tags on the current commit
+    tag=$(git describe --tags --exact-match HEAD 2> /dev/null || true)
+    if [ $? -ne 0 ]; then
+        echo "No tags on the current commit"
+        tag="N/A"
+    fi
+    commit=`git rev-parse HEAD`
+    popd
+
+    echo "Creating version info $file"
+    if [ tag == "N/A" ]; then
+        echo "- No tags on the current commit" >> $file
+    else
+        echo "- Release: [$tag]($github_url/releases/$tag)" >> $file
+    fi
+    echo "- Commit: $commit" >> $file
+
+    echo "Version info $file"
+    cat $file
+}
+
 platforms=(
     "iOS"
     "iOS Simulator"
@@ -130,3 +166,4 @@ done
 
 package $target "${platforms[@]}"
 compress $target
+create_version_info "artifacts/release_notes.md"
