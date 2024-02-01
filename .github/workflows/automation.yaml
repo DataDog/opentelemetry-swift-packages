@@ -12,7 +12,7 @@ on:
   push:
     branches:
     # For testing purposes, use your branch name here
-      - "ganeshnj/ci/setup-automation"
+      - "ganeshnj/ci/carthage-auto"
 
 env:
   GH_TOKEN: ${{ github.token }}
@@ -51,6 +51,7 @@ jobs:
         if: ${{ env.SKIP_RELEASE != 'true' }}
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
           path: opentelemetry-swift-packages
 
       - name: Checkout opentelemetry-swift
@@ -77,6 +78,12 @@ jobs:
           path: |
             ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
           if-no-files-found: error
+
+      - name: Setup Git
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        run: |
+          git config --global user.name "Datadog SDK Bot"
+          git config --global user.email "dd-sdk-bot@datadoghq.com"
 
       - name: Release
         if: ${{ env.SKIP_RELEASE != 'true' }}

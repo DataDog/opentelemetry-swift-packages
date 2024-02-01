@@ -2,6 +2,8 @@
 
 set -e
 
+cartage_spec_OpenTelemetryApi="OpenTelemetryApi.json"
+
 # Usage function
 function usage() {
     echo "Usage: $0 [-v <version>]"
@@ -47,7 +49,36 @@ fi
 
 echo "Version: $version"
 
+# Appends "{version}": "{framework path}" to the json file
+# before
+# {
+#     "1.9.1": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.1/OpenTelemetryApi.xcframework.zip"
+# }
+# after
+# {
+#     "1.9.2": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.2/OpenTelemetryApi.xcframework.zip"
+#     "1.9.1": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.1/OpenTelemetryApi.xcframework.zip"
+# }
+function update_cartage_binary_project_spec() {
+    file=$1
+    version=$2
+    url="https://github.com/DataDog/opentelemetry-swift-packages/releases/download/$version/OpenTelemetryApi.xcframework.zip"
+    echo "Updating $file"
+    jq --arg version "$version" --arg url "$url" '. + {($version): $url}' $file > tmp.json && mv tmp.json $file
+    echo "Updated $file"
+    cat $file
+}
+
+function commit_and_push() {
+    git add $cartage_spec_OpenTelemetryApi
+    git commit -m "chore: Release $version"
+    git push
+}
+
 gh release create $version \
     artifacts/OpenTelemetryApi.xcframework.zip \
     --title "OpenTelemetry Swift $version" \
     --notes-file artifacts/release_notes.md
+
+update_cartage_binary_project_spec $cartage_spec_OpenTelemetryApi $version
+commit_and_push
