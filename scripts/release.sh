@@ -71,6 +71,11 @@ function update_cartage_binary_project_spec() {
 
 function commit_and_push() {
     git add $cartage_spec_OpenTelemetryApi
+    # check if there are any changes
+    if [[ -z $(git status -s) ]]; then
+        echo "No changes to commit"
+        exit 0
+    fi
     git commit -m "chore: Release $version"
     git push
 }
