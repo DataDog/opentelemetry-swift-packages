@@ -1,0 +1,85 @@
+name: Automation
+
+on:
+  schedule:
+    # Everyday at 9:00 AM UTC
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'open-telemetry/opentelemetry-swift tag to build'
+        required: false
+  push:
+    branches:
+    # For testing purposes, use your branch name here
+      - "ganeshnj/ci/setup-automation"
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  build:
+    runs-on: macos-12
+
+    steps:
+      - name: Get latest release on opentelemetry-swift
+        run: |
+          tag=${{ github.event.inputs.tag }}
+
+          # if tag is not provided, get the latest release tag
+          if [ -z "$tag" ]; then
+            detected_tag=$(gh api repos/open-telemetry/opentelemetry-swift/releases |  jq -r '.[0].tag_name')
+            if [ -z "$detected_tag" ]; then
+              echo "Failed to get latest release tag on opentelemetry-swift"
+              exit 1
+            fi
+            echo "Detected $detected_tag as latest release tag on opentelemetry-swift"
+            tag=$detected_tag
+          fi
+
+          echo "Using $tag as opentelemetry-swift ref"
+          echo "OTEL_SWIFT_TAG=$tag" >> $GITHUB_ENV
+
+      - name: Check if release already exists
+        run: |
+          if gh release view ${{ env.OTEL_SWIFT_TAG }} --repo datadog/opentelemetry-swift-packages >/dev/null 2>&1; then
+            echo "Release ${{ env.OTEL_SWIFT_TAG }} already exists"
+            echo "SKIP_RELEASE=true" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout self
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          path: opentelemetry-swift-packages
+
+      - name: Checkout opentelemetry-swift
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          repository: open-telemetry/opentelemetry-swift
+          path: opentelemetry-swift
+          ref: ${{ env.OTEL_SWIFT_TAG }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        working-directory: ./opentelemetry-swift-packages
+        run: |
+          ./scripts/build.sh --source ../opentelemetry-swift --target OpenTelemetryApi
+
+      - name: Upload artifacts
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenTelemetryApi.xcframework
+          path: |
+            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
+          if-no-files-found: error
+
+      - name: Release
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        working-directory: ./opentelemetry-swift-packages
+        run: |
+          ./scripts/release.sh --version ${{ env.OTEL_SWIFT_TAG }}
