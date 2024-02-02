@@ -6,6 +6,30 @@ function usage() {
     exit 0
 }
 
+while (( "$#" )); do
+    case "$1" in
+        -v|--version)
+                version="$2"
+                shift 2
+                ;;
+        -h|--help)
+                usage
+                ;;
+        --) # end argument parsing
+            shift
+            break
+            ;;
+        -*|--*=) # unsupported flags
+            echo "Error: Unsupported flag $1" >&2
+            exit 1
+            ;;
+        *) # preserve positional arguments
+            PARAMS="$PARAMS $1"
+            shift
+            ;;
+    esac
+done
+
 # Check required arguments
 if [ -z "$version" ]; then
     echo "Error: Missing version"
