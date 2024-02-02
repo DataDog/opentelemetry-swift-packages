@@ -93,5 +93,6 @@ jobs:
 
       - name: Verify
         if: ${{ env.SKIP_RELEASE != 'true' }}
+        working-directory: ./opentelemetry-swift-packages
         run: |
           pod lib lint
