@@ -3,6 +3,7 @@
 set -e
 
 cartage_spec_OpenTelemetryApi="OpenTelemetryApi.json"
+podspec_OpenTelemetryApi="OpenTelemetryApi.podspec"
 
 # Usage function
 function usage() {
@@ -71,6 +72,7 @@ function update_cartage_binary_project_spec() {
 
 function commit_and_push() {
     git add $cartage_spec_OpenTelemetryApi
+    git add $podspec_OpenTelemetryApi
     # check if there are any changes
     if [[ -z $(git status -s) ]]; then
         echo "No changes to commit"
@@ -80,10 +82,32 @@ function commit_and_push() {
     git push
 }
 
+# Updates the version and sha1 in the podspec file
+function update_podspec() {
+    podspec_file=$1
+    version=$2
+    sha1=$3
+
+    # update version
+    #  s.version = "1.9.1" to s.version = "1.9.2"
+    sed -i '' "s|s.version = \".*\"|s.version = \"$version\"|g" $podspec_file
+
+    # update sha1
+    #  sha1: "34156dcaa4be3cc1d95a7d4c2bc792cb30405b2a" to sha1: "07b738438d7a88be3d3cd89656af350702824b8e"
+    sed -i '' "s|sha1: \".*\"|sha1: \"$sha1\"|g" $podspec_file
+
+    echo "Updated $podspec_file"
+    cat $podspec_file
+}
+
 gh release create $version \
     artifacts/OpenTelemetryApi.xcframework.zip \
     --title "OpenTelemetry Swift $version" \
     --notes-file artifacts/release_notes.md
 
 update_cartage_binary_project_spec $cartage_spec_OpenTelemetryApi $version
+
+sha1=$(shasum -a 1 artifacts/OpenTelemetryApi.xcframework.zip | awk '{print $1}')
+update_podspec $podspec_OpenTelemetryApi $version $sha1
+
 commit_and_push
