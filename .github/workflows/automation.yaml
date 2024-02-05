@@ -12,7 +12,7 @@ on:
   push:
     branches:
     # For testing purposes, use your branch name here
-      - "ganeshnj/ci/carthage-auto"
+      - "ganeshnj/ci/coco-auto"
 
 env:
   GH_TOKEN: ${{ github.token }}
@@ -79,14 +79,22 @@ jobs:
             ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
           if-no-files-found: error
 
-      - name: Setup Git
-        if: ${{ env.SKIP_RELEASE != 'true' }}
-        run: |
-          git config --global user.name "Datadog SDK Bot"
-          git config --global user.email "dd-sdk-bot@datadoghq.com"
-
-      - name: Release
+      - name: Prepare
         if: ${{ env.SKIP_RELEASE != 'true' }}
         working-directory: ./opentelemetry-swift-packages
         run: |
-          ./scripts/release.sh --version ${{ env.OTEL_SWIFT_TAG }}
+          git config --global user.name "Datadog SDK Bot"
+          git config --global user.email "dd-sdk-bot@datadoghq.com"
+          ./scripts/prepare.sh --version ${{ env.OTEL_SWIFT_TAG }}
+
+      - name: Verify
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        working-directory: ./opentelemetry-swift-packages
+        run: |
+          ./scripts/verify.sh
+
+      - name: Publish
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        working-directory: ./opentelemetry-swift-packages
+        run: |
+          ./scripts/publish.sh --version ${{ env.OTEL_SWIFT_TAG }}
