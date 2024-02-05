@@ -84,7 +84,7 @@ jobs:
         working-directory: ./opentelemetry-swift-packages
         run: |
           git config --global user.name "Datadog SDK Bot"
-          git config --global user.email "dd-sdk-bot@datadoghq.com"
+          git config --global user.email "noreply@datadoghq.com"
           ./scripts/prepare.sh --version ${{ env.OTEL_SWIFT_TAG }}
 
       - name: Verify
