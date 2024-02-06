@@ -138,7 +138,7 @@ function create_version_info() {
     popd
 
     echo "Creating version info $file"
-    if [ tag == "N/A" ]; then
+    if [ $tag == "N/A" ]; then
         echo "- No tags on the current commit" >> $file
     else
         echo "- Release: [$tag]($github_url/releases/$tag)" >> $file

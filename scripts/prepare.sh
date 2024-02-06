@@ -70,7 +70,7 @@ function update_cartage_binary_project_spec() {
     cat $file
 }
 
-function commit() {
+function commit_push() {
     git add $cartage_spec_OpenTelemetryApi
     git add $podspec_OpenTelemetryApi
     # check if there are any changes
@@ -79,6 +79,7 @@ function commit() {
         exit 0
     fi
     git commit -m "chore: Release $version"
+    git push
 }
 
 # Updates the version and sha1 in the podspec file
@@ -104,4 +105,4 @@ update_cartage_binary_project_spec $cartage_spec_OpenTelemetryApi $version
 sha1=$(shasum -a 1 artifacts/OpenTelemetryApi.xcframework.zip | awk '{print $1}')
 update_podspec $podspec_OpenTelemetryApi $version $sha1
 
-commit
+commit_push

@@ -42,5 +42,3 @@ gh release create $version \
     artifacts/OpenTelemetryApi.xcframework.zip \
     --title "OpenTelemetry Swift $version" \
     --notes-file artifacts/release_notes.md
-
-git push
