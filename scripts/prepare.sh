@@ -3,7 +3,7 @@
 set -e
 
 cartage_spec_OpenTelemetryApi="OpenTelemetryApi.json"
-podspec_OpenTelemetryApi="OpenTelemetryApi.podspec"
+podspec_OpenTelemetryApi="OpenTelemetrySwiftApi.podspec"
 
 # Usage function
 function usage() {
