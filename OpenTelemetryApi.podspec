@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name = "OpenTelemetryApi"
+  s.name = "OpenTelemetrySwiftApi"
   s.version = "1.9.1"
   s.summary = "Unofficial OpenTelemetry API for Swift maintained by Datadog"
   s.description = "This is an unofficial OpenTelemetry API for Swift maintained by Datadog team and primarily used by Datadog SDK for iOS. It follows the official OpenTelemetry releases and provides CocoaPods compatible distribution."
