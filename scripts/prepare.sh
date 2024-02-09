@@ -116,5 +116,5 @@ else
     gh release create $version \
         artifacts/OpenTelemetryApi.zip \
         --title "OpenTelemetry Swift $version" \
-        --notes-file artifacts/release_notes.md \
+        --notes-file artifacts/release_notes.md
 fi
