@@ -60,10 +60,23 @@ function update_package_swift() {
     sed -i '' 's/.static/.dynamic/g' $file
 }
 
+
 # Build the scheme for the platform
 function build() {
     scheme=$1
     platform=$2
+
+    archs=""
+    if [ "$platform" == "iOS" ]; then
+        archs="arm64 arm64e"
+    elif [ "$platform" == "iOS Simulator" ]; then
+        archs="x86_64 arm64"
+    elif [ "$platform" == "tvOS" ]; then
+        archs="arm64"
+    elif [ "$platform" == "tvOS Simulator" ]; then
+        archs="x86_64 arm64"
+    fi
+
     echo "Building $scheme for $platform"
     xcodebuild archive -workspace $source \
         -scheme $scheme \
@@ -72,8 +85,38 @@ function build() {
         -derivedDataPath ".build" \
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+        ARCHS="$archs" \
         | xcpretty
-    echo "Done building $scheme for $platform"
+    echo "Done archiving $scheme for $platform"
+
+    # Copy the swiftmodule to the framework
+    echo "Copying swiftmodule to $framework_path"
+    framework_path="archives/$scheme/$platform.xcarchive/Products/usr/local/lib/$scheme.framework"
+    modules_path="$framework_path/Modules"
+    mkdir -p "$modules_path"
+
+    build_products_path=".build/Build/Intermediates.noindex/ArchiveIntermediates/$scheme/BuildProductsPath"
+
+    # The platform name is used to determine the swiftmodule path
+    case $platform in
+        "iOS")
+            release_folder="Release-iphoneos"
+            ;;
+        "iOS Simulator")
+            release_folder="Release-iphonesimulator"
+            ;;
+        "tvOS")
+            release_folder="Release-appletvos"
+            ;;
+        "tvOS Simulator")
+            release_folder="Release-appletvsimulator"
+            ;;
+    esac
+
+    release_path="$build_products_path/$release_folder"
+    swift_module_path="$release_path/$scheme.swiftmodule"
+    cp -r "$swift_module_path" "$modules_path"
+    echo "Done copying swiftmodule to $framework_path"
 }
 
 # Create xcframework from the archives
@@ -98,25 +141,25 @@ function package() {
     rm -rf "frameworks/$scheme.xcframework"
 
     echo "Creating $scheme.xcframework"
-    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme.xcframework" | xcpretty
+    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcpretty
     echo "Done creating $scheme.xcframework"
 }
 
 # Zip the xcframework
 function compress() {
     scheme=$1
-    echo "Removing artifacts/$scheme.xcframework.zip"
-    rm -rf "artifacts/$scheme.xcframework.zip"
+    echo "Removing artifacts/$scheme.zip"
+    rm -rf "artifacts/$scheme.zip"
 
-    echo "Zipping $scheme.xcframework"
+    echo "Zipping $scheme"
     mkdir -p "artifacts"
 
     # by default zip will include the full path of the files in the zip file
     # -j will not include the path but it doesn't work with -r
-    pushd "frameworks/$scheme.xcframework"
-    zip -r "../../artifacts/$scheme.xcframework.zip" *
+    pushd "frameworks"
+    zip -r "../artifacts/$scheme.zip" "$scheme"
     popd
-    echo "Done zipping $scheme.xcframework"
+    echo "Done zipping $scheme"
 }
 
 # Writes the source information to given file file
@@ -144,6 +187,16 @@ function create_version_info() {
         echo "- Release: [$tag]($github_url/releases/$tag)" >> $file
     fi
     echo "- Commit: $commit" >> $file
+
+    # checksum of all the zipped artifacts
+    echo "- Checksums:" >> $file
+    for artifact in `ls artifacts/*.zip`; do
+        checksum=$(shasum -a 1 $artifact | cut -d ' ' -f 1)
+
+        # get zip file name without the path
+        artifact=$(basename $artifact)
+        echo "  - $artifact: $checksum" >> $file
+    done
 
     echo "Version info $file"
     cat $file

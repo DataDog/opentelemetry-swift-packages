@@ -34,7 +34,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: OpenTelemetryApi.xcframework
+          name: OpenTelemetryApi
           path: |
-            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
+            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.zip
           if-no-files-found: error
