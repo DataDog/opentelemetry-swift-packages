@@ -2,7 +2,7 @@
 
 set -e
 
-pod_name_OpenTelemetryApi="OpenTelemetrySwiftApi.podspec"
+pod_name_OpenTelemetryApi="OpenTelemetrySwiftApi"
 
 # Usage function
 function usage() {
@@ -45,10 +45,11 @@ fi
 echo "Version: $version"
 
 echo "Checking if pod $pod_name_OpenTelemetryApi version $version exists"
+
 if pod trunk info $pod_name_OpenTelemetryApi | grep -q "$version"; then
     echo "Pod $pod_name_OpenTelemetryApi version $version exists"
 else
     echo "Pod $pod_name_OpenTelemetryApi version $version does not exist"
     echo "Updating pod $pod_name_OpenTelemetryApi version $version"
-    pod trunk push $pod_name_OpenTelemetryApi --allow-warnings --verbose
+    pod trunk push $pod_name_OpenTelemetryApi.podspec --allow-warnings --verbose
 fi
