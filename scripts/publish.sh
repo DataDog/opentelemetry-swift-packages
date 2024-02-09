@@ -45,7 +45,7 @@ fi
 echo "Version: $version"
 
 echo "Checking if pod $pod_name_OpenTelemetryApi version $version exists"
-if pod trunk info $pod_name_OpenTelemetryApi | grep -q " - $version:"; then
+if pod trunk info $pod_name_OpenTelemetryApi | grep -q "$version"; then
     echo "Pod $pod_name_OpenTelemetryApi version $version exists"
 else
     echo "Pod $pod_name_OpenTelemetryApi version $version does not exist"
