@@ -36,5 +36,5 @@ jobs:
         with:
           name: OpenTelemetryApi.xcframework
           path: |
-            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
+            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.zip
           if-no-files-found: error

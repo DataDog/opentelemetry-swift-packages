@@ -53,17 +53,17 @@ echo "Version: $version"
 # Appends "{version}": "{framework path}" to the json file
 # before
 # {
-#     "1.9.1": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.1/OpenTelemetryApi.xcframework.zip"
+#     "1.9.1": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.1/OpenTelemetryApi.zip"
 # }
 # after
 # {
-#     "1.9.2": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.2/OpenTelemetryApi.xcframework.zip"
-#     "1.9.1": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.1/OpenTelemetryApi.xcframework.zip"
+#     "1.9.2": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.2/OpenTelemetryApi.zip"
+#     "1.9.1": "https://github.com/DataDog/opentelemetry-swift-packages/releases/download/1.9.1/OpenTelemetryApi.zip"
 # }
 function update_cartage_binary_project_spec() {
     file=$1
     version=$2
-    url="https://github.com/DataDog/opentelemetry-swift-packages/releases/download/$version/OpenTelemetryApi.xcframework.zip"
+    url="https://github.com/DataDog/opentelemetry-swift-packages/releases/download/$version/OpenTelemetryApi.zip"
     echo "Updating $file"
     jq --arg version "$version" --arg url "$url" '. + {($version): $url}' $file > tmp.json && mv tmp.json $file
     echo "Updated $file"
@@ -102,7 +102,19 @@ function update_podspec() {
 
 update_cartage_binary_project_spec $cartage_spec_OpenTelemetryApi $version
 
-sha1=$(shasum -a 1 artifacts/OpenTelemetryApi.xcframework.zip | awk '{print $1}')
+sha1=$(shasum -a 1 artifacts/OpenTelemetryApi.zip | awk '{print $1}')
 update_podspec $podspec_OpenTelemetryApi $version $sha1
 
 commit_push
+
+echo "Checking if the github release $version exists"
+if gh release view $version > /dev/null; then
+    echo "Github release $version exists"
+else
+    echo "Github release $version does not exist"
+    echo "Creating github draft release $version"
+    gh release create $version \
+        artifacts/OpenTelemetryApi.zip \
+        --title "OpenTelemetry Swift $version" \
+        --notes-file artifacts/release_notes.md \
+fi

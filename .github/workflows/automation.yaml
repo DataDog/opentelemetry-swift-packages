@@ -12,7 +12,7 @@ on:
   push:
     branches:
     # For testing purposes, use your branch name here
-      - "ganeshnj/ci/coco-auto"
+      - "ganeshnj/ci/pod-push"
 
 env:
   GH_TOKEN: ${{ github.token }}
@@ -22,6 +22,17 @@ jobs:
     runs-on: macos-12
 
     steps:
+      - name: Environment information
+        run: |
+          echo "macOS system version information"
+          sw_vers
+          echo "Xcode version"
+          xcodebuild -version
+          echo "Xcode build tools"
+          xcodebuild -showsdks
+          echo "Swift version"
+          swift --version
+
       - name: Get latest release on opentelemetry-swift
         run: |
           tag=${{ github.event.inputs.tag }}
@@ -48,14 +59,12 @@ jobs:
           fi
 
       - name: Checkout self
-        if: ${{ env.SKIP_RELEASE != 'true' }}
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
           path: opentelemetry-swift-packages
 
       - name: Checkout opentelemetry-swift
-        if: ${{ env.SKIP_RELEASE != 'true' }}
         uses: actions/checkout@v4
         with:
           repository: open-telemetry/opentelemetry-swift
@@ -76,7 +85,7 @@ jobs:
         with:
           name: OpenTelemetryApi.xcframework
           path: |
-            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.xcframework.zip
+            ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.zip
           if-no-files-found: error
 
       - name: Prepare
@@ -94,7 +103,8 @@ jobs:
           ./scripts/verify.sh
 
       - name: Publish
-        if: ${{ env.SKIP_RELEASE != 'true' }}
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         working-directory: ./opentelemetry-swift-packages
         run: |
           ./scripts/publish.sh --version ${{ env.OTEL_SWIFT_TAG }}
