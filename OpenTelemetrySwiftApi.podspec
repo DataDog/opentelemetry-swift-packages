@@ -19,6 +19,6 @@ Pod::Spec.new do |s|
   s.swift_version = "5.7.1"
   s.ios.deployment_target = "11.0"
   s.tvos.deployment_target = "11.0"
-  s.source = { http: "#{s.homepage}/releases/download/#{s.version}/OpenTelemetryApi.zip", sha1: "42459e60e8a9accecf446b96c477a0b067be40e1" }
+  s.source = { http: "#{s.homepage}/releases/download/#{s.version}/OpenTelemetryApi.zip", sha1: "b35aa665bbe66fee7d869d2c5ca057c442862948" }
   s.vendored_frameworks = 'OpenTelemetryApi/OpenTelemetryApi.xcframework'
 end
