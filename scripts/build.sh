@@ -65,6 +65,13 @@ function update_package_swift() {
 function build() {
     scheme=$1
     platform=$2
+    archs="arm64 arm64e"
+
+    # if the platform is Simulator, the archs needs to be x86_64
+    if [[ $platform == *"Simulator"* ]]; then
+        archs="x86_64"
+    fi
+
     echo "Building $scheme for $platform"
     xcodebuild archive -workspace $source \
         -scheme $scheme \
@@ -73,6 +80,7 @@ function build() {
         -derivedDataPath ".build" \
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+        ARCHS="$archs" \
         | xcpretty
     echo "Done archiving $scheme for $platform"
 
