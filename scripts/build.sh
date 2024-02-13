@@ -188,6 +188,16 @@ function create_version_info() {
     fi
     echo "- Commit: $commit" >> $file
 
+    # checksum of all the zipped artifacts
+    echo "- Checksums:" >> $file
+    for artifact in `ls artifacts/*.zip`; do
+        checksum=$(shasum -a 1 $artifact | cut -d ' ' -f 1)
+
+        # get zip file name without the path
+        artifact=$(basename $artifact)
+        echo "  - $artifact: $checksum" >> $file
+    done
+
     echo "Version info $file"
     cat $file
 }
