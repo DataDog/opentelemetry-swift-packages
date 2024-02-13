@@ -65,11 +65,16 @@ function update_package_swift() {
 function build() {
     scheme=$1
     platform=$2
-    archs="arm64 arm64e"
 
-    # if the platform is Simulator, the archs needs to be x86_64
-    if [[ $platform == *"Simulator"* ]]; then
-        archs="x86_64"
+    archs=""
+    if [ "$platform" == "iOS" ]; then
+        archs="arm64 arm64e"
+    elif [ "$platform" == "iOS Simulator" ]; then
+        archs="x86_64 arm64"
+    elif [ "$platform" == "tvOS" ]; then
+        archs="arm64"
+    elif [ "$platform" == "tvOS Simulator" ]; then
+        archs="x86_64 arm64"
     fi
 
     echo "Building $scheme for $platform"
