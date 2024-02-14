@@ -29,7 +29,7 @@ page and add it to your project.
 ### CocoaPods
 
 ```ruby
-pod 'OpenTelemetryApi', '~> 1.9.1'
+pod 'OpenTelemetrySwiftApi', '~> 1.9.1'
 ```
 
 ### Carthage

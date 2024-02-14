@@ -1,1 +1,1 @@
-pod lib lint --allow-warnings
+pod spec lint --allow-warnings
