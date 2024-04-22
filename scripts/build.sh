@@ -56,6 +56,11 @@ echo "Target: $target"
 # Static libraries can't be bundled into xcframeworks hence the need to replace them with dynamic libraries
 function update_package_swift() {
     file=$1
+    # check if the file exists
+    if [ ! -f $file ]; then
+        echo "File $file does not exist"
+        return
+    fi
     echo "Updating $file"
     sed -i '' 's/.static/.dynamic/g' $file
 }
