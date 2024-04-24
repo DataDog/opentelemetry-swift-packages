@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "OpenTelemetrySwiftApi"
-  s.version = "1.9.2"
+  s.version = "1.6.0"
   s.summary = "Unofficial OpenTelemetry API for Swift maintained by Datadog"
   s.description = "This is an unofficial OpenTelemetry API for Swift maintained by Datadog team and primarily used by Datadog SDK for iOS. It follows the official OpenTelemetry releases and provides CocoaPods compatible distribution."
 
@@ -224,6 +224,6 @@ LICENSE
   s.ios.deployment_target = "11.0"
   s.tvos.deployment_target = "11.0"
   s.osx.deployment_target = "10.13"
-  s.source = { http: "#{s.homepage}/releases/download/#{s.version}/OpenTelemetryApi.zip", sha1: "15b2f80206e9f8964744cb07a4943e4477d35b33" }
+  s.source = { http: "#{s.homepage}/releases/download/#{s.version}/OpenTelemetryApi.zip", sha1: "5db74581718b9cf223ce6ed66aa47fbfb9d5b521" }
   s.vendored_frameworks = 'OpenTelemetryApi/OpenTelemetryApi.xcframework'
 end
