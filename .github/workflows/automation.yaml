@@ -12,7 +12,7 @@ on:
   push:
     branches:
     # For testing purposes, use your branch name here
-      - "ganeshnj/fix/commit-signature-valid"
+      - "ganeshnj/feat/macos-support"
 
 env:
   GH_TOKEN: ${{ github.token }}
