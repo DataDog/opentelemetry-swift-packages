@@ -80,6 +80,8 @@ function build() {
         archs="arm64"
     elif [ "$platform" == "tvOS Simulator" ]; then
         archs="x86_64 arm64"
+    elif [ "$platform" == "macOS" ]; then
+        archs="x86_64 arm64"
     fi
 
     echo "Building $scheme for $platform"
@@ -115,6 +117,9 @@ function build() {
             ;;
         "tvOS Simulator")
             release_folder="Release-appletvsimulator"
+            ;;
+        "macOS")
+            release_folder="Release" # for some reason, the directory is not suffixed with the platform name
             ;;
     esac
 
@@ -212,6 +217,7 @@ platforms=(
     "iOS Simulator"
     "tvOS"
     "tvOS Simulator"
+    "macOS"
 )
 
 update_package_swift "$source/Package.swift"
