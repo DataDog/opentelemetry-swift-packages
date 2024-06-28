@@ -38,3 +38,7 @@ jobs:
           path: |
             ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.zip
           if-no-files-found: error
+
+      - name: Test SPM
+        run: |
+          swift test | xcbeautify
