@@ -40,6 +40,17 @@ pod 'OpenTelemetrySwiftApi', '~> 1.9.1'
 binary "https://raw.githubusercontent.com/DataDog/opentelemetry-swift-packages/main/OpenTelemetryApi.json" ~> 1.9.1
 ```
 
+## SPM
+
+```swift
+.package(url: "https://github.com/DataDog/opentelemetry-swift-packages.git", .upToNextMinor(from: "1.9.1")),
+```
+
+You can import a specific version of the package by copy-pasting source code
+from the
+[releases](https://github.com/open-telemetry/opentelemetry-swift/releases). Make
+sure to use the same version as the OpenTelemetry release.
+
 ## Contributing
 
 Before considering contributions to the project, please take a moment to read
