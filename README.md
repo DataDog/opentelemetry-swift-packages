@@ -8,8 +8,10 @@ for Tracing which are provided by the `OpenTelemetryApi` package in
 dd-sdk-ios supports Swift Package Manager (SPM), XCFramework, CocoaPods, and
 Carthage but OpenTelemetry only provides the SPM package support. This
 repository fills the gap by providing the XCFramework, CocoaPods, and Carthage
-packages for the OpenTelemetryApi package. It uses the official releases from
-opentelemetry-swift and maintains the same versioning scheme.
+packages for the OpenTelemetryApi package. Also, hosts API only SPM package
+which allows SPM users to use the API package without cloning the OpenTelemetry
+repository. It uses the official releases from opentelemetry-swift and maintains
+the same versioning scheme.
 
 ## Usage
 
