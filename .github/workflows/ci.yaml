@@ -38,3 +38,13 @@ jobs:
           path: |
             ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.zip
           if-no-files-found: error
+
+  spm:
+    runs-on: macos-12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Test
+        run: |
+          swift test | xcbeautify
