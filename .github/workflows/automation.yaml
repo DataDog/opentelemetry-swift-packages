@@ -19,7 +19,7 @@ env:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: macos-14
 
     steps:
       - name: Environment information
@@ -59,12 +59,12 @@ jobs:
           fi
 
       - name: Checkout self
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: opentelemetry-swift-packages
 
       - name: Checkout opentelemetry-swift
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: open-telemetry/opentelemetry-swift
           path: opentelemetry-swift
@@ -80,7 +80,7 @@ jobs:
 
       - name: Upload artifacts
         if: ${{ env.SKIP_RELEASE != 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: OpenTelemetryApi
           path: |
