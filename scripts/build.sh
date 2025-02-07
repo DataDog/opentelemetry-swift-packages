@@ -142,6 +142,18 @@ function package() {
         framework_path="archives/$scheme/$platform.xcarchive/Products/usr/local/lib/$scheme.framework"
 
         # For some reason, the dsym path needs to be absolute, else framework creation fails
+        echo "ls ."
+        ls -al "."
+        echo "ls archives"
+        ls -al "archives"
+        echo "ls archives/$scheme"
+        ls -al "archives/$scheme"
+        echo "ls archives/$scheme/$platform.xcarchive"
+        ls -al "archives/$scheme/$platform.xcarchive"
+        echo "ls archives/$scheme/$platform.xcarchive/dSYMs"
+        ls -al "archives/$scheme/$platform.xcarchive/dSYMs"
+
+        echo "readlink -f archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"
         dsym_path=`readlink -f "archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"`
 
         args+=("-framework" "$framework_path" "-debug-symbols" "$dsym_path")
