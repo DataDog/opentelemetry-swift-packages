@@ -34,14 +34,22 @@ final class PropagatedSpanTest: XCTestCase {
         span.setAttribute(key: "MyLongAttributeKey", value: AttributeValue.int(123))
         span.setAttribute(key: "MyEmptyStringAttributeKey", value: AttributeValue.string(""))
         span.setAttribute(key: "MyNilAttributeKey", value: nil)
-        span.setAttribute(key: "MyEmptyStringArrayAttributeKey", value: AttributeValue.stringArray([]))
-        span.setAttribute(key: "MyEmptyBoolArrayAttributeKey", value: AttributeValue.boolArray([]))
-        span.setAttribute(key: "MyEmptyIntArrayAttributeKey", value: AttributeValue.intArray([]))
-        span.setAttribute(key: "MyEmptyDoubleArrayAttributeKey", value: AttributeValue.doubleArray([]))
+        span.setAttribute(key: "MyEmptyStringArrayAttributeKey", value: .array(AttributeArray.empty))
+        span.setAttribute(key: "MyEmptyBoolArrayAttributeKey", value: .array(AttributeArray.empty))
+        span.setAttribute(key: "MyEmptyIntArrayAttributeKey", value: .array(AttributeArray.empty))
+        span.setAttribute(key: "MyEmptyDoubleArrayAttributeKey", value: .array(AttributeArray.empty))
         span.addEvent(name: "event")
         span.addEvent(name: "event", timestamp: Date(timeIntervalSinceReferenceDate: 0))
         span.addEvent(name: "event", attributes: ["MyBooleanAttributeKey": AttributeValue.bool(true)])
         span.addEvent(name: "event", attributes: ["MyBooleanAttributeKey": AttributeValue.bool(true)], timestamp: Date(timeIntervalSinceReferenceDate: 1.5))
+        span.recordException(NSError(domain: "test", code: 0), timestamp: Date(timeIntervalSinceReferenceDate: 3))
+        span.recordException(NSError(domain: "test", code: 0), attributes: ["MyBooleanAttributeKey": AttributeValue.bool(true)], timestamp: Date(timeIntervalSinceReferenceDate: 4.5))
+
+#if !os(Linux)
+        span.recordException(NSException(name: .genericException, reason: nil))
+        span.recordException(NSException(name: .genericException, reason: nil), attributes: ["MyStringAttributeKey": AttributeValue.string("MyStringAttributeValue")])
+#endif
+
         span.status = .ok
         span.end()
         span.end(time: Date())
