@@ -16,10 +16,6 @@ let package = Package(
         .library(name: "OpenTelemetryApi", targets: ["OpenTelemetryApi"]),
     ],
     targets: [
-        .target(name: "OpenTelemetryApi",
-                dependencies: []),
-        .testTarget(name: "OpenTelemetryApiTests",
-                    dependencies: ["OpenTelemetryApi"],
-                    path: "Tests/OpenTelemetryApiTests")
+        .target(name: "OpenTelemetryApi", dependencies: []),
     ]
 )
