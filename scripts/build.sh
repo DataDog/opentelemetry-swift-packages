@@ -8,7 +8,6 @@ target="OpenTelemetryApi"
 function usage() {
     echo "Usage: $0 [-s <source>] [-t <target>]"
     echo "  -s, --source    Specify the source directory"
-    echo "  -g, --github    Specify the github url"
     echo "  -t, --target    Specify the target directory"
     echo "  -h, --help      Display this help message"
     exit 0
@@ -23,10 +22,6 @@ while (( "$#" )); do
                 ;;
         -t|--target)
                 target="$2"
-                shift 2
-                ;;
-        -g|--github)
-                github_url="$2"
                 shift 2
                 ;;
         -h|--help)
@@ -78,7 +73,7 @@ function build() {
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
         ARCHS="$archs" \
-        | xcpretty
+        | xcbeautify
     echo "Done archiving $scheme for $platform"
 
     # Copy the swiftmodule to the framework
@@ -137,7 +132,7 @@ function package() {
     rm -rf "frameworks/$scheme.xcframework"
 
     echo "Creating $scheme.xcframework"
-    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcpretty
+    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcbeautify
     echo "Done creating $scheme.xcframework"
 }
 
@@ -159,7 +154,7 @@ function compress() {
 }
 
 # Writes the source information to given file file
-# It includes the git commit hash and tag name
+# It includes the git commit hash
 function create_version_info() {
     file=$1
 
@@ -167,21 +162,10 @@ function create_version_info() {
     rm -rf $file
 
     pushd $source
-    # git describe can fail if there are no tags on the current commit
-    tag=$(git describe --tags --exact-match HEAD 2> /dev/null || true)
-    if [ $? -ne 0 ]; then
-        echo "No tags on the current commit"
-        tag="N/A"
-    fi
     commit=`git rev-parse HEAD`
     popd
 
     echo "Creating version info $file"
-    if [ $tag == "N/A" ]; then
-        echo "- No tags on the current commit" >> $file
-    else
-        echo "- Release: [$tag]($github_url/releases/$tag)" >> $file
-    fi
     echo "- Commit: $commit" >> $file
 
     # checksum of all the zipped artifacts
@@ -212,4 +196,6 @@ done
 
 package $target "${platforms[@]}"
 compress $target
+
+# Generate release notes that can be later used for the GH release
 create_version_info "artifacts/release_notes.md"

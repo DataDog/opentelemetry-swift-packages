@@ -8,7 +8,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  spm-build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Test
+        run: |
+          swift build | xcbeautify
+
+  build-xcframework:
     runs-on: macos-14
 
     steps:
@@ -17,7 +27,7 @@ jobs:
         with:
           path: opentelemetry-swift-packages
 
-      - name: Build
+      - name: Build XCFramework
         working-directory: ./opentelemetry-swift-packages
         run: |
           ./scripts/build.sh --source . --target OpenTelemetryApi
@@ -29,13 +39,3 @@ jobs:
           path: |
             ./opentelemetry-swift-packages/artifacts/OpenTelemetryApi.zip
           if-no-files-found: error
-
-  spm:
-    runs-on: macos-14
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Test
-        run: |
-          swift build | xcbeautify
