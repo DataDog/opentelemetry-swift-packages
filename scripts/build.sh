@@ -2,8 +2,6 @@
 
 set -e
 
-source="../opentelemetry-swift"
-github_url="https://github.com/open-telemetry/opentelemetry-swift"
 target="OpenTelemetryApi"
 
 # Usage function
@@ -51,19 +49,6 @@ done
 
 echo "Source: $source"
 echo "Target: $target"
-
-# Replace all type: .static with .dynamic
-# Static libraries can't be bundled into xcframeworks hence the need to replace them with dynamic libraries
-function update_package_swift() {
-    file=$1
-    # check if the file exists
-    if [ ! -f $file ]; then
-        echo "File $file does not exist"
-        return
-    fi
-    echo "Updating $file"
-    sed -i '' 's/.static/.dynamic/g' $file
-}
 
 
 # Build the scheme for the platform
@@ -142,17 +127,6 @@ function package() {
         framework_path="archives/$scheme/$platform.xcarchive/Products/usr/local/lib/$scheme.framework"
 
         # For some reason, the dsym path needs to be absolute, else framework creation fails
-        echo "ls ."
-        ls -al "."
-        echo "ls archives"
-        ls -al "archives"
-        echo "ls archives/$scheme"
-        ls -al "archives/$scheme"
-        echo "ls archives/$scheme/$platform.xcarchive"
-        ls -al "archives/$scheme/$platform.xcarchive"
-        echo "ls archives/$scheme/$platform.xcarchive/dSYMs"
-        ls -al "archives/$scheme/$platform.xcarchive/dSYMs"
-
         echo "readlink -f archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"
         dsym_path=`readlink -f "archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"`
 
@@ -231,10 +205,6 @@ platforms=(
     "tvOS Simulator"
     "macOS"
 )
-
-update_package_swift "$source/Package.swift"
-update_package_swift "$source/Package@swift-5.6.swift"
-update_package_swift "$source/Package@swift-5.9.swift"
 
 for platform in "${platforms[@]}"; do
     build $target "$platform"
