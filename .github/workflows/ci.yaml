@@ -17,19 +17,10 @@ jobs:
         with:
           path: opentelemetry-swift-packages
 
-      - name: Checkout opentelemetry-swift
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          repository: open-telemetry/opentelemetry-swift
-          path: opentelemetry-swift
-          ref: main
-          fetch-depth: 0
-          fetch-tags: true
-
       - name: Build
         working-directory: ./opentelemetry-swift-packages
         run: |
-          ./scripts/build.sh --source ../opentelemetry-swift --target OpenTelemetryApi
+          ./scripts/build.sh --source . --target OpenTelemetryApi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
