@@ -197,5 +197,5 @@ done
 package $target "${platforms[@]}"
 compress $target
 
-# Generate release notes that can be later used for the GH release
-create_version_info "artifacts/release_notes.md"
+# Generate version info for the XCFramework (commit hash + sha)
+create_version_info "artifacts/version_info.md"
