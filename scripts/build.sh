@@ -64,7 +64,7 @@ function build() {
     fi
 
     echo "Building $scheme for $platform"
-    xcodebuild archive -workspace $source \
+    DD_XCODEBUILD_PATCH=1 xcodebuild archive -workspace $source \
         -scheme $scheme \
         -destination "generic/platform=$platform" \
         -archivePath "archives/$scheme/$platform" \
@@ -72,7 +72,7 @@ function build() {
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
         ARCHS="$archs" \
-        | xcpretty
+        | xcbeautify
     echo "Done archiving $scheme for $platform"
 
     # Copy the swiftmodule to the framework
@@ -121,6 +121,7 @@ function package() {
         framework_path="archives/$scheme/$platform.xcarchive/Products/usr/local/lib/$scheme.framework"
 
         # For some reason, the dsym path needs to be absolute, else framework creation fails
+        echo "readlink -f archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"
         dsym_path=`readlink -f "archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"`
 
         args+=("-framework" "$framework_path" "-debug-symbols" "$dsym_path")
@@ -130,7 +131,7 @@ function package() {
     rm -rf "frameworks/$scheme.xcframework"
 
     echo "Creating $scheme.xcframework"
-    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcpretty
+    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcbeautify
     echo "Done creating $scheme.xcframework"
 }
 
@@ -188,10 +189,15 @@ platforms=(
     "macOS"
 )
 
+rm -rf .build
+rm -rf archives
+
 for platform in "${platforms[@]}"; do
     build $target "$platform"
 done
 
 package $target "${platforms[@]}"
 compress $target
-create_version_info "artifacts/release_notes.md"
+
+# Generate version info for the XCFramework (commit hash + sha)
+create_version_info "artifacts/version_info.md"
