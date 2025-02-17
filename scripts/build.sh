@@ -2,15 +2,12 @@
 
 set -e
 
-source="../opentelemetry-swift"
-github_url="https://github.com/open-telemetry/opentelemetry-swift"
 target="OpenTelemetryApi"
 
 # Usage function
 function usage() {
     echo "Usage: $0 [-s <source>] [-t <target>]"
     echo "  -s, --source    Specify the source directory"
-    echo "  -g, --github    Specify the github url"
     echo "  -t, --target    Specify the target directory"
     echo "  -h, --help      Display this help message"
     exit 0
@@ -25,10 +22,6 @@ while (( "$#" )); do
                 ;;
         -t|--target)
                 target="$2"
-                shift 2
-                ;;
-        -g|--github)
-                github_url="$2"
                 shift 2
                 ;;
         -h|--help)
@@ -51,20 +44,6 @@ done
 
 echo "Source: $source"
 echo "Target: $target"
-
-# Replace all type: .static with .dynamic
-# Static libraries can't be bundled into xcframeworks hence the need to replace them with dynamic libraries
-function update_package_swift() {
-    file=$1
-    # check if the file exists
-    if [ ! -f $file ]; then
-        echo "File $file does not exist"
-        return
-    fi
-    echo "Updating $file"
-    sed -i '' 's/.static/.dynamic/g' $file
-}
-
 
 # Build the scheme for the platform
 function build() {
@@ -173,7 +152,7 @@ function compress() {
 }
 
 # Writes the source information to given file file
-# It includes the git commit hash and tag name
+# It includes the git commit hash
 function create_version_info() {
     file=$1
 
@@ -181,21 +160,10 @@ function create_version_info() {
     rm -rf $file
 
     pushd $source
-    # git describe can fail if there are no tags on the current commit
-    tag=$(git describe --tags --exact-match HEAD 2> /dev/null || true)
-    if [ $? -ne 0 ]; then
-        echo "No tags on the current commit"
-        tag="N/A"
-    fi
     commit=`git rev-parse HEAD`
     popd
 
     echo "Creating version info $file"
-    if [ $tag == "N/A" ]; then
-        echo "- No tags on the current commit" >> $file
-    else
-        echo "- Release: [$tag]($github_url/releases/$tag)" >> $file
-    fi
     echo "- Commit: $commit" >> $file
 
     # checksum of all the zipped artifacts
@@ -219,10 +187,6 @@ platforms=(
     "tvOS Simulator"
     "macOS"
 )
-
-update_package_swift "$source/Package.swift"
-update_package_swift "$source/Package@swift-5.6.swift"
-update_package_swift "$source/Package@swift-5.9.swift"
 
 for platform in "${platforms[@]}"; do
     build $target "$platform"
