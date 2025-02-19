@@ -1,55 +1,35 @@
 # opentelemetry-swift-packages
 
-[![Automation](https://github.com/DataDog/opentelemetry-swift-packages/actions/workflows/automation.yaml/badge.svg)](https://github.com/DataDog/opentelemetry-swift-packages/actions/workflows/automation.yaml?query=event%3Aschedule+branch%3Amain)
+This repository provides multiple distribution options (XCFramework, CocoaPods, Carthage, and SwiftPM) for the `OpenTelemetryApi` library from [opentelemetry-swift](https://github.com/open-telemetry/opentelemetry-swift). It is tailored for the iOS platform versions supported by [dd-sdk-ios](https://github.com/DataDog/dd-sdk-ios).
 
-[dd-sdk-ios](https://github.com/DataDog/dd-sdk-ios) uses the OpenTelemetry APIs
-for Tracing which are provided by the `OpenTelemetryApi` package in
-[opentelemetry-swift](https://github.com/open-telemetry/opentelemetry-swift).
-dd-sdk-ios supports Swift Package Manager (SPM), XCFramework, CocoaPods, and
-Carthage but OpenTelemetry only provides the SPM package support. This
-repository fills the gap by providing the XCFramework, CocoaPods, and Carthage
-packages for the OpenTelemetryApi package. Also, hosts API only SPM package
-which allows SPM users to use the API package without cloning the OpenTelemetry
-repository. It uses the official releases from opentelemetry-swift and maintains
-the same versioning scheme.
+It also hosts an API-only SwiftPM package to let SPM users integrate the OpenTelemetry API without pulling in the entire OpenTelemetry dependency tree. Versions here follow the official releases of [opentelemetry-swift](https://github.com/open-telemetry/opentelemetry-swift) and maintain the same versioning scheme.
 
-## Usage
 
-## Automation workflow
+## Installation
 
-The `automation` workflow is setup for running every day and it checks for new
-version release of the OpenTelemetry Swift libraries. If a new version is found,
-it will build the new version using the tag, package it as XCFramework, and push
-it to the releases, and update the CocoaPods and Carthage specs.
+You can integrate OpenTelemetryApi using one of the following methods:
 
 ### XCFramework
 
-You can download the XCFramework from the
-[releases](https://github.com/DataDog/opentelemetry-swift-packages/releases)
-page and add it to your project.
+Download the `.zip` file containing the `OpenTelemetryApi.xcframework` from the [Releases](https://github.com/DataDog/opentelemetry-swift-packages/releases) page and add it to your project.
 
 ### CocoaPods
 
 ```ruby
-pod 'OpenTelemetrySwiftApi', '~> 1.9.1'
+pod 'OpenTelemetrySwiftApi', '~> 1.13.0'
 ```
 
 ### Carthage
 
 ```ruby
-binary "https://raw.githubusercontent.com/DataDog/opentelemetry-swift-packages/main/OpenTelemetryApi.json" ~> 1.9.1
+binary "https://raw.githubusercontent.com/DataDog/opentelemetry-swift-packages/main/OpenTelemetryApi.json" ~> 1.13.0
 ```
 
-## SPM
+### SPM
 
 ```swift
-.package(url: "https://github.com/DataDog/opentelemetry-swift-packages.git", .upToNextMinor(from: "1.9.1")),
+.package(url: "https://github.com/DataDog/opentelemetry-swift-packages.git", .upToNextMinor(from: "1.13.0")),
 ```
-
-You can import a specific version of the package by copy-pasting source code
-from the
-[releases](https://github.com/open-telemetry/opentelemetry-swift/releases). Make
-sure to use the same version as the OpenTelemetry release.
 
 ## Contributing
 

@@ -67,12 +67,14 @@ class PropagatedSpan: Span {
         return false
     }
 
+  // swiftlint:disable unused_setter_value
     var status: Status {
         get {
             return Status.ok
         }
         set {}
     }
+  // swiftlint:enable unused_setter_value
 
     var description: String {
         return "PropagatedSpan"
@@ -89,4 +91,12 @@ class PropagatedSpan: Span {
     func addEvent(name: String, attributes: [String: AttributeValue]) {}
 
     func addEvent(name: String, attributes: [String: AttributeValue], timestamp: Date) {}
+
+    func recordException(_ exception: SpanException) {}
+
+    func recordException(_ exception: any SpanException, timestamp: Date) {}
+
+    func recordException(_ exception: any SpanException, attributes: [String: AttributeValue]) {}
+
+    func recordException(_ exception: any SpanException, attributes: [String: AttributeValue], timestamp: Date) {}
 }

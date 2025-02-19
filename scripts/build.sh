@@ -2,15 +2,12 @@
 
 set -e
 
-source="../opentelemetry-swift"
-github_url="https://github.com/open-telemetry/opentelemetry-swift"
 target="OpenTelemetryApi"
 
 # Usage function
 function usage() {
     echo "Usage: $0 [-s <source>] [-t <target>]"
     echo "  -s, --source    Specify the source directory"
-    echo "  -g, --github    Specify the github url"
     echo "  -t, --target    Specify the target directory"
     echo "  -h, --help      Display this help message"
     exit 0
@@ -25,10 +22,6 @@ while (( "$#" )); do
                 ;;
         -t|--target)
                 target="$2"
-                shift 2
-                ;;
-        -g|--github)
-                github_url="$2"
                 shift 2
                 ;;
         -h|--help)
@@ -52,20 +45,6 @@ done
 echo "Source: $source"
 echo "Target: $target"
 
-# Replace all type: .static with .dynamic
-# Static libraries can't be bundled into xcframeworks hence the need to replace them with dynamic libraries
-function update_package_swift() {
-    file=$1
-    # check if the file exists
-    if [ ! -f $file ]; then
-        echo "File $file does not exist"
-        return
-    fi
-    echo "Updating $file"
-    sed -i '' 's/.static/.dynamic/g' $file
-}
-
-
 # Build the scheme for the platform
 function build() {
     scheme=$1
@@ -85,7 +64,7 @@ function build() {
     fi
 
     echo "Building $scheme for $platform"
-    xcodebuild archive -workspace $source \
+    DD_XCODEBUILD_PATCH=1 xcodebuild archive -workspace $source \
         -scheme $scheme \
         -destination "generic/platform=$platform" \
         -archivePath "archives/$scheme/$platform" \
@@ -93,7 +72,7 @@ function build() {
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
         ARCHS="$archs" \
-        | xcpretty
+        | xcbeautify
     echo "Done archiving $scheme for $platform"
 
     # Copy the swiftmodule to the framework
@@ -142,6 +121,7 @@ function package() {
         framework_path="archives/$scheme/$platform.xcarchive/Products/usr/local/lib/$scheme.framework"
 
         # For some reason, the dsym path needs to be absolute, else framework creation fails
+        echo "readlink -f archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"
         dsym_path=`readlink -f "archives/$scheme/$platform.xcarchive/dSYMs/$scheme.framework.dSYM"`
 
         args+=("-framework" "$framework_path" "-debug-symbols" "$dsym_path")
@@ -151,7 +131,7 @@ function package() {
     rm -rf "frameworks/$scheme.xcframework"
 
     echo "Creating $scheme.xcframework"
-    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcpretty
+    xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcbeautify
     echo "Done creating $scheme.xcframework"
 }
 
@@ -173,7 +153,7 @@ function compress() {
 }
 
 # Writes the source information to given file file
-# It includes the git commit hash and tag name
+# It includes the git commit hash
 function create_version_info() {
     file=$1
 
@@ -181,21 +161,10 @@ function create_version_info() {
     rm -rf $file
 
     pushd $source
-    # git describe can fail if there are no tags on the current commit
-    tag=$(git describe --tags --exact-match HEAD 2> /dev/null || true)
-    if [ $? -ne 0 ]; then
-        echo "No tags on the current commit"
-        tag="N/A"
-    fi
     commit=`git rev-parse HEAD`
     popd
 
     echo "Creating version info $file"
-    if [ $tag == "N/A" ]; then
-        echo "- No tags on the current commit" >> $file
-    else
-        echo "- Release: [$tag]($github_url/releases/$tag)" >> $file
-    fi
     echo "- Commit: $commit" >> $file
 
     # checksum of all the zipped artifacts
@@ -220,9 +189,8 @@ platforms=(
     "macOS"
 )
 
-update_package_swift "$source/Package.swift"
-update_package_swift "$source/Package@swift-5.6.swift"
-update_package_swift "$source/Package@swift-5.9.swift"
+rm -rf .build
+rm -rf archives
 
 for platform in "${platforms[@]}"; do
     build $target "$platform"
@@ -230,4 +198,6 @@ done
 
 package $target "${platforms[@]}"
 compress $target
-create_version_info "artifacts/release_notes.md"
+
+# Generate version info for the XCFramework (commit hash + sha)
+create_version_info "artifacts/version_info.md"
