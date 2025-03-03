@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/zsh
 
 set -e
+source ./scripts/utils/echo-color.sh
 
 target="OpenTelemetryApi"
 
@@ -42,8 +43,8 @@ while (( "$#" )); do
     esac
 done
 
-echo "Source: $source"
-echo "Target: $target"
+echo_info "Source: $source"
+echo_info "Target: $target"
 
 # Build the scheme for the platform
 function build() {
@@ -51,19 +52,20 @@ function build() {
     platform=$2
 
     archs=""
-    if [ "$platform" == "iOS" ]; then
+
+    if [ "$platform" = "iOS" ]; then
         archs="arm64 arm64e"
-    elif [ "$platform" == "iOS Simulator" ]; then
+    elif [ "$platform" = "iOS Simulator" ]; then
         archs="x86_64 arm64"
-    elif [ "$platform" == "tvOS" ]; then
+    elif [ "$platform" = "tvOS" ]; then
         archs="arm64"
-    elif [ "$platform" == "tvOS Simulator" ]; then
+    elif [ "$platform" = "tvOS Simulator" ]; then
         archs="x86_64 arm64"
-    elif [ "$platform" == "macOS" ]; then
+    elif [ "$platform" = "macOS" ]; then
         archs="x86_64 arm64"
     fi
 
-    echo "Building $scheme for $platform"
+    echo_info "Building $scheme for $platform"
     DD_XCODEBUILD_PATCH=1 xcodebuild archive -workspace $source \
         -scheme $scheme \
         -destination "generic/platform=$platform" \
@@ -73,10 +75,10 @@ function build() {
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
         ARCHS="$archs" \
         | xcbeautify
-    echo "Done archiving $scheme for $platform"
+    echo_succ "Done archiving $scheme for $platform"
 
     # Copy the swiftmodule to the framework
-    echo "Copying swiftmodule to $framework_path"
+    echo_info "Copying swiftmodule to $framework_path"
     framework_path="archives/$scheme/$platform.xcarchive/Products/usr/local/lib/$scheme.framework"
     modules_path="$framework_path/Modules"
     mkdir -p "$modules_path"
@@ -105,7 +107,7 @@ function build() {
     release_path="$build_products_path/$release_folder"
     swift_module_path="$release_path/$scheme.swiftmodule"
     cp -r "$swift_module_path" "$modules_path"
-    echo "Done copying swiftmodule to $framework_path"
+    echo_succ "Done copying swiftmodule to $framework_path"
 }
 
 # Create xcframework from the archives
@@ -116,7 +118,7 @@ function package() {
 
     args=()
     for platform in "${platforms[@]}"; do
-        echo "Adding $platform to $scheme.xcframework"
+        echo_info "Adding $platform to $scheme.xcframework"
 
         framework_path="archives/$scheme/$platform.xcarchive/Products/usr/local/lib/$scheme.framework"
 
@@ -130,9 +132,9 @@ function package() {
     echo "Removing archives/$scheme.xcframework"
     rm -rf "frameworks/$scheme.xcframework"
 
-    echo "Creating $scheme.xcframework"
+    echo_info "Creating $scheme.xcframework"
     xcodebuild -create-xcframework "${args[@]}" -output "frameworks/$scheme/$scheme.xcframework" | xcbeautify
-    echo "Done creating $scheme.xcframework"
+    echo_succ "Done creating $scheme.xcframework"
 }
 
 # Zip the xcframework
@@ -141,7 +143,7 @@ function compress() {
     echo "Removing artifacts/$scheme.zip"
     rm -rf "artifacts/$scheme.zip"
 
-    echo "Zipping $scheme"
+    echo_info "Zipping $scheme"
     mkdir -p "artifacts"
 
     # by default zip will include the full path of the files in the zip file
@@ -149,7 +151,7 @@ function compress() {
     pushd "frameworks"
     zip -r "../artifacts/$scheme.zip" "$scheme"
     popd
-    echo "Done zipping $scheme"
+    echo_succ "Done zipping $scheme"
 }
 
 # Writes the source information to given file
@@ -164,7 +166,7 @@ function create_version_info() {
     commit="$(git rev-parse HEAD)"
     popd > /dev/null
 
-    echo "Creating version info $file"
+    echo_info "Creating version info $file"
     echo "- Commit (git rev-parse HEAD): $commit" >> "$file"
     echo "- GITHUB_SHA: ${GITHUB_SHA:-null}" >> "$file"
     echo "- GITHUB_REF: ${GITHUB_REF:-null}" >> "$file"
@@ -179,8 +181,10 @@ function create_version_info() {
         echo "  - $artifact: $checksum" >> "$file"
     done
 
-    echo "Version info $file"
+    echo_succ "Version info $file Created:"
+    echo "------------- BEGIN"
     cat "$file"
+    echo "------------- END"
 }
 
 platforms=(

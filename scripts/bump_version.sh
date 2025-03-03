@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/zsh
 
 set -e
+source ./scripts/utils/echo-color.sh
 
 cartage_spec_OpenTelemetryApi="OpenTelemetryApi.json"
 podspec_OpenTelemetryApi="OpenTelemetrySwiftApi.podspec"
@@ -63,23 +64,32 @@ echo "Version: $version"
 function update_cartage_binary_project_spec() {
     file=$1
     version=$2
+
+    echo_info "Updating '$file' to version: '$version'"
     url="https://github.com/DataDog/opentelemetry-swift-packages/releases/download/$version/OpenTelemetryApi.zip"
-    echo "Updating $file"
     jq --arg version "$version" --arg url "$url" '. + {($version): $url}' $file > tmp.json && mv tmp.json $file
-    echo "Updated $file"
-    cat $file
+
+    echo_succ "Updated $file:"
+    echo "------------- BEGIN"
+    cat "$file"
+    echo "------------- END"
 }
 
-function commit_push() {
-    git add $cartage_spec_OpenTelemetryApi
-    git add $podspec_OpenTelemetryApi
-    # check if there are any changes
+function commit() {
+    echo_info "Staging changes for commit..."
+
+    git add "$cartage_spec_OpenTelemetryApi"
+    git add "$podspec_OpenTelemetryApi"
+
+    # Check if there are any changes staged
     if [[ -z $(git status -s) ]]; then
-        echo "No changes to commit"
+        echo_warn "No changes detected. Nothing to commit."
         exit 0
     fi
-    git commit -m "chore: Release $version"
-    git push
+
+    git commit -m "chore: Update Carthage and CocoaPods release to $version"
+
+    echo_succ "✅ Commit successful! Now push the branch and open a pull request."
 }
 
 # Updates the version and sha1 in the podspec file
@@ -87,6 +97,8 @@ function update_podspec() {
     podspec_file=$1
     version=$2
     sha1=$3
+
+    echo_info "Updating '$podspec_file' to version: '$version' and sha: '$sha1'"
 
     # update version
     #  s.version = "1.9.1" to s.version = "1.9.2"
@@ -96,25 +108,24 @@ function update_podspec() {
     #  sha1: "34156dcaa4be3cc1d95a7d4c2bc792cb30405b2a" to sha1: "07b738438d7a88be3d3cd89656af350702824b8e"
     sed -i '' "s|sha1: \".*\"|sha1: \"$sha1\"|g" $podspec_file
 
-    echo "Updated $podspec_file"
-    cat $podspec_file
+    echo_succ "Updated $podspec_file:"
+    echo "------------- BEGIN"
+    cat "$podspec_file"
+    echo "------------- END"
 }
 
-update_cartage_binary_project_spec $cartage_spec_OpenTelemetryApi $version
+download_dir="releases/$version"
+artifact_name="OpenTelemetryApi.zip"
 
-sha1=$(shasum -a 1 artifacts/OpenTelemetryApi.zip | awk '{print $1}')
+rm -rf "$download_dir"
+
+echo_info "Downloading '$version' from GitHub"
+gh release download "$version" -D "$download_dir" -p $artifact_name
+sha1=$(shasum -a 1 "$download_dir/$artifact_name" | awk '{print $1}')
+
+echo_succ "Downloaded '$download_dir/$artifact_name', SHA=$sha1"
+
+update_cartage_binary_project_spec $cartage_spec_OpenTelemetryApi $version
 update_podspec $podspec_OpenTelemetryApi $version $sha1
 
-commit_push
-
-echo "Checking if the github release $version exists"
-if gh release view $version > /dev/null; then
-    echo "Github release $version exists"
-else
-    echo "Github release $version does not exist"
-    echo "Creating github draft release $version"
-    gh release create $version \
-        artifacts/OpenTelemetryApi.zip \
-        --title "OpenTelemetry Swift $version" \
-        --notes-file artifacts/release_notes.md
-fi
+commit
