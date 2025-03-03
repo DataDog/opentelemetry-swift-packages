@@ -114,6 +114,13 @@ function update_podspec() {
     echo "------------- END"
 }
 
+function verify_podspec() {
+    podspec_file=$1
+
+    echo_info "Verifying '$podspec_file'"
+    pod spec lint --allow-warnings "$podspec_file"
+}
+
 download_dir="releases/$version"
 artifact_name="OpenTelemetryApi.zip"
 
@@ -127,5 +134,6 @@ echo_succ "Downloaded '$download_dir/$artifact_name', SHA=$sha1"
 
 update_cartage_binary_project_spec $cartage_spec_OpenTelemetryApi $version
 update_podspec $podspec_OpenTelemetryApi $version $sha1
+verify_podspec $podspec_OpenTelemetryApi
 
 commit
