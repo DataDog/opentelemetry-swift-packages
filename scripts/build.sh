@@ -162,14 +162,7 @@ function create_version_info() {
     echo "Removing version info $file"
     rm -rf "$file"
 
-    pushd "$source" > /dev/null
-    commit="$(git rev-parse HEAD)"
-    popd > /dev/null
-
     echo_info "Creating version info $file"
-    echo "- Commit (git rev-parse HEAD): $commit" >> "$file"
-    echo "- GITHUB_SHA: ${GITHUB_SHA:-null}" >> "$file"
-    echo "- GITHUB_REF: ${GITHUB_REF:-null}" >> "$file"
 
     # Checksum of all the zipped artifacts
     echo "- Checksums:" >> "$file"
@@ -205,5 +198,4 @@ done
 package $target "${platforms[@]}"
 compress $target
 
-# Generate version info for the XCFramework (commit hash + sha)
 create_version_info "artifacts/version_info.md"

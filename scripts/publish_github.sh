@@ -1,8 +1,7 @@
-#!/bin/bash
+#!/bin/zsh
 
 set -e
-
-pod_name_OpenTelemetryApi="OpenTelemetrySwiftApi"
+source ./scripts/utils/echo-color.sh
 
 # Usage function
 function usage() {
@@ -36,20 +35,14 @@ while (( "$#" )); do
     esac
 done
 
-# Check required arguments
-if [ -z "$version" ]; then
-    echo "Error: Missing version"
-    usage
-fi
-
-echo "Version: $version"
-
-echo "Checking if pod $pod_name_OpenTelemetryApi version $version exists"
-
-if pod trunk info $pod_name_OpenTelemetryApi | grep -q "$version"; then
-    echo "Pod $pod_name_OpenTelemetryApi version $version exists"
+echo_info "Checking if the github release $version exists"
+if gh release view $version > /dev/null; then
+    echo_err "Github release $version exists"
 else
-    echo "Pod $pod_name_OpenTelemetryApi version $version does not exist"
-    echo "Updating pod $pod_name_OpenTelemetryApi version $version"
-    pod trunk push $pod_name_OpenTelemetryApi.podspec --allow-warnings --verbose
+    echo_info "Github release $version does not exist"
+    echo "Creating github draft release $version"
+    gh release create $version \
+        artifacts/OpenTelemetryApi.zip \
+        --title "$version" \
+        --notes-file artifacts/version_info.md
 fi

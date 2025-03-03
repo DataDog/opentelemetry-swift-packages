@@ -1,9 +1,7 @@
-.PHONY: test xcframework bump-carthage-and-cocoapods-version
+.PHONY: test xcframework publish-github bump-carthage-and-cocoapods-version publish-podspec
 
 ECHO_TITLE=$(PWD)/scripts/utils/echo-color.sh --title
-ECHO_INFO=$(PWD)/scripts/utils/echo-color.sh --info
 ECHO_ERROR=$(PWD)/scripts/utils/echo-color.sh --err
-ECHO_WARNING=$(PWD)/scripts/utils/echo-color.sh --warn
 ECHO_SUCCESS=$(PWD)/scripts/utils/echo-color.sh --succ
 
 define require_param
@@ -22,7 +20,17 @@ xcframework:
 	@$(ECHO_TITLE) "make xcframework"
 	./scripts/build.sh --source . --target OpenTelemetryApi
 
+publish-github:
+	@$(call require_param,VERSION)
+	@$(ECHO_TITLE) "make publish-github VERSION='$(VERSION)'"
+	./scripts/publish_github.sh --version "$(VERSION)"
+
 bump-carthage-and-cocoapods-version:
 	@$(call require_param,VERSION)
 	@$(ECHO_TITLE) "make bump-carthage-and-cocoapods-version VERSION='$(VERSION)'"
 	./scripts/bump_version.sh --version "$(VERSION)"
+
+publish-podspec:
+	@$(call require_param,VERSION)
+	@$(ECHO_TITLE) "make publish-cocoapods VERSION='$(VERSION)'"
+	./scripts/publish_podspec.sh --version "$(VERSION)"
