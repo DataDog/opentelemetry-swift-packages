@@ -152,33 +152,35 @@ function compress() {
     echo "Done zipping $scheme"
 }
 
-# Writes the source information to given file file
-# It includes the git commit hash
+# Writes the source information to given file
+# It includes the Git commit hash
 function create_version_info() {
     file=$1
 
     echo "Removing version info $file"
-    rm -rf $file
+    rm -rf "$file"
 
-    pushd $source
-    commit=`git rev-parse HEAD`
-    popd
+    pushd "$source" > /dev/null
+    commit="$(git rev-parse HEAD)"
+    popd > /dev/null
 
     echo "Creating version info $file"
-    echo "- Commit: $commit" >> $file
+    echo "- Commit (git rev-parse HEAD): $commit" >> "$file"
+    echo "- GITHUB_SHA: ${GITHUB_SHA:-null}" >> "$file"
+    echo "- GITHUB_REF: ${GITHUB_REF:-null}" >> "$file"
 
-    # checksum of all the zipped artifacts
-    echo "- Checksums:" >> $file
-    for artifact in `ls artifacts/*.zip`; do
-        checksum=$(shasum -a 1 $artifact | cut -d ' ' -f 1)
+    # Checksum of all the zipped artifacts
+    echo "- Checksums:" >> "$file"
+    for artifact in artifacts/*.zip; do
+        checksum=$(shasum -a 1 "$artifact" | cut -d ' ' -f 1)
 
-        # get zip file name without the path
-        artifact=$(basename $artifact)
-        echo "  - $artifact: $checksum" >> $file
+        # Get zip file name without the path
+        artifact=$(basename "$artifact")
+        echo "  - $artifact: $checksum" >> "$file"
     done
 
     echo "Version info $file"
-    cat $file
+    cat "$file"
 }
 
 platforms=(
