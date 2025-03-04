@@ -2,6 +2,17 @@
 
 This document outlines the steps required to release a new version of `OpenTelemetryApi` in this repository.
 
+## Prerequisites
+
+Before starting the release process, ensure that you have the [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated. You can check your authentication status with:
+```
+gh auth status
+```
+If you are not authenticated, log in using:
+```
+gh auth login
+```
+
 ## 1. Prepare the Code Update
 
 This step is **manual**. It involves importing the latest `OpenTelemetryApi` code from upstream and preparing a pull request for review.

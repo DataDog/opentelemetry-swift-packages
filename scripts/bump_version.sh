@@ -42,6 +42,9 @@ fi
 
 echo_info "Version: $version"
 
+echo_info "Verifying GitHub CLI authentication (run 'gh auth login' if not authenticated)..."
+gh auth status
+
 # Ensure we are on the `main` branch
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$current_branch" != "main" ]]; then
