@@ -8,6 +8,9 @@ on:
     tags:
       - '*'
 
+env:
+  GH_TOKEN: ${{ github.token }}
+
 jobs:
   release:
     runs-on: macos-14
