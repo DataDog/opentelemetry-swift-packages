@@ -36,6 +36,10 @@ binary "https://raw.githubusercontent.com/DataDog/opentelemetry-swift-packages/m
 Before considering contributions to the project, please take a moment to read
 our brief [contribution guidelines](CONTRIBUTING.md).
 
+## Release Process
+
+For detailed instructions on how to release a new version of `OpenTelemetryApi` in this repo, refer to the [Release Workflow](RELEASE.md).
+
 ## License
 
 [Apache License, v2.0](LICENSE)
