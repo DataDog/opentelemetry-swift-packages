@@ -6,7 +6,6 @@
 import Foundation
 
 public class DefaultLogger: Logger {
-
   private static let instanceWithDomain = DefaultLogger(true)
   private static let instanceNoDomain = DefaultLogger(false)
   private static let noopLogRecordBuilder = NoopLogRecordBuilder()
@@ -19,9 +18,9 @@ public class DefaultLogger: Logger {
 
   static func getInstance(_ hasDomain: Bool) -> Logger {
     if hasDomain {
-      return Self.instanceWithDomain
+      return instanceWithDomain
     } else {
-      return Self.instanceNoDomain
+      return instanceNoDomain
     }
   }
 
@@ -65,10 +64,6 @@ public class DefaultLogger: Logger {
       return self
     }
 
-    func emit() {
-
-    }
-
+    func emit() {}
   }
-
 }

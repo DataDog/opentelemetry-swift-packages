@@ -1,13 +1,12 @@
 //
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
-// 
+//
 
 import Foundation
 
 public class DefaultStableMeter: StableMeter {
-
-  internal init() {}
+  init() {}
 
   public func counterBuilder(name: String) -> LongCounterBuilder {
     NoopLongCounterBuilder()
@@ -54,23 +53,43 @@ public class DefaultStableMeter: StableMeter {
       NoopLongGaugeBuilder()
     }
 
+    func build() -> DoubleGauge {
+      NoopDoubleGauge()
+    }
+
     func buildWithCallback(_ callback: @escaping (ObservableDoubleMeasurement) -> Void) -> ObservableDoubleGauge {
       NoopObservableDoubleGauge()
     }
   }
 
-    private class NoopLongGaugeBuilder: LongGaugeBuilder {
+  private class NoopLongGaugeBuilder: LongGaugeBuilder {
+    func build() -> LongGauge {
+      NoopLongGauge()
+    }
+
     func buildWithCallback(_ callback: @escaping (ObservableLongMeasurement) -> Void) -> ObservableLongGauge {
-        NoopObservableLongGauge()
+      NoopObservableLongGauge()
     }
   }
 
+  private struct NoopDoubleGauge: DoubleGauge {
+    func record(value: Double) {}
+
+    func record(value: Double, attributes: [String: AttributeValue]) {}
+  }
+
+  private struct NoopLongGauge: LongGauge {
+    func record(value: Int) {}
+
+    func record(value: Int, attributes: [String: AttributeValue]) {}
+  }
+
   private struct NoopObservableLongGauge: ObservableLongGauge {
-      func close() {}
+    func close() {}
   }
 
   private struct NoopObservableDoubleGauge: ObservableDoubleGauge {
-      func close() {}
+    func close() {}
   }
 
   private class NoopDoubleUpDownCounterBuilder: DoubleUpDownCounterBuilder {
@@ -84,7 +103,7 @@ public class DefaultStableMeter: StableMeter {
   }
 
   private struct NoopObservableDoubleUpDownCounter: ObservableDoubleUpDownCounter {
-      func close() {}
+    func close() {}
   }
 
   private struct NoopDoubleUpDownCounter: DoubleUpDownCounter {
@@ -109,7 +128,7 @@ public class DefaultStableMeter: StableMeter {
   }
 
   private class NoopObservableLongUpDownCounter: ObservableLongUpDownCounter {
-      func close() {}
+    func close() {}
   }
 
   private class NoopDoubleHistogram: DoubleHistogram {
@@ -147,11 +166,11 @@ public class DefaultStableMeter: StableMeter {
   }
 
   private class NoopObservableLongCounter: ObservableLongCounter {
-      func close() {}
+    func close() {}
   }
 
   private class NoopObservableDoubleCounter: ObservableDoubleCounter {
-      func close() {}
+    func close() {}
   }
 
   private class StableNoopDoubleCounterBuilder: DoubleCounterBuilder {
