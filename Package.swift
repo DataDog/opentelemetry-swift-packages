@@ -14,7 +14,7 @@ let package = Package(
         .watchOS(.v7)
     ],
     products: [
-        .library(name: "OpenTelemetryApi", type: .dynamic, targets: ["OpenTelemetryApi"]),
+        .library(name: "OpenTelemetryApi", targets: ["OpenTelemetryApi"]),
     ],
     targets: [
         .target(name: "OpenTelemetryApi", dependencies: []),
