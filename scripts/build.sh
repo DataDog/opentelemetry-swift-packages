@@ -45,6 +45,8 @@ done
 
 echo_info "Source: $source"
 echo_info "Target: $target"
+echo_info "xcodebuild -version"
+xcodebuild -version
 
 # Build the scheme for the platform
 function build() {

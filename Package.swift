@@ -14,14 +14,29 @@ let package = Package(
         .watchOS(.v7)
     ],
     products: [
-        .library(name: "OpenTelemetryApi", type: .dynamic, targets: ["OpenTelemetryApi"]),
+        .library(name: "OpenTelemetryApi", targets: ["OpenTelemetryApi"]),
     ],
     targets: [
         .target(name: "OpenTelemetryApi", dependencies: []),
     ]
 )
 
+/// Customize package for building XCFramework:
 if ProcessInfo.processInfo.environment["DD_XCODEBUILD_PATCH"] != nil {
+    // RUM-9224: Enforce dynamic linking because `xcodebuild` does not generate dSYMs
+    // when linking statically (static linking is the default starting from Xcode 15.0).
+    //
+    // Ref.: https://developer.apple.com/documentation/xcode-release-notes/xcode-15-release-notes
+    // > A new linker has been written to significantly speed up static linking.
+    // > It’s the default for all macOS, iOS, tvOS and visionOS binaries.
+    package.products = package.products.map { product in
+        if let library = product as? Product.Library {
+            return .library(name: library.name, type: .dynamic, targets: library.targets)
+        } else {
+            return product
+        }
+    }
+
     // Workaround for `xcodebuild` failing to detect `OpenTelemetryApi` as an individual target
     // when the package has only one library.
     //
