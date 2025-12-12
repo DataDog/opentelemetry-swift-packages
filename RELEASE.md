@@ -19,7 +19,7 @@ This step is **manual**. It involves importing the latest `OpenTelemetryApi` cod
 
 - Create a new branch.
 - Import the `OpenTelemetryApi` code from the desired release (`x.y.z`) of [`opentelemetry-swift`](https://github.com/open-telemetry/opentelemetry-swift/releases).
--Copy the new version's code into `Sources/OpenTelemetryApi/`
+- Copy the new version's code into `Sources/OpenTelemetryApi/`
 - Create a PR with the changes.
 
 Once reviewed and approved, merge the PR into the `main` branch.
