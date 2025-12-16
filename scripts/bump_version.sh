@@ -4,7 +4,6 @@ set -e
 source ./scripts/utils/echo-color.sh
 
 cartage_spec_OpenTelemetryApi="OpenTelemetryApi.json"
-podspec_OpenTelemetryApi="OpenTelemetrySwiftApi.podspec"
 
 # Usage function
 function usage() {
@@ -53,7 +52,7 @@ if [[ "$current_branch" != "main" ]]; then
 fi
 
 # Create the new branch
-branch_name="bump-carthage-and-cocoapods-to-$version"
+branch_name="bump-carthage-to-$version"
 echo_info "Creating branch: $branch_name"
 git checkout -b "$branch_name"
 
@@ -81,46 +80,17 @@ function update_cartage_binary_project_spec() {
     echo "------------- END"
 }
 
-# Updates the version and sha1 in the podspec file
-function update_podspec() {
-    podspec_file=$1
-    version=$2
-    sha1=$3
-
-    echo_info "Updating '$podspec_file' to version: '$version' and sha: '$sha1'"
-
-    # update version
-    #  s.version = "1.9.1" to s.version = "1.9.2"
-    sed -i '' "s|s.version = \".*\"|s.version = \"$version\"|g" "$podspec_file"
-
-    # update sha1
-    #  sha1: "34156dcaa4be3cc1d95a7d4c2bc792cb30405b2a" to sha1: "07b738438d7a88be3d3cd89656af350702824b8e"
-    sed -i '' "s|sha1: \".*\"|sha1: \"$sha1\"|g" "$podspec_file"
-
-    echo_succ "Updated $podspec_file:"
-    echo "------------- BEGIN"
-    cat "$podspec_file"
-    echo "------------- END"
-}
-
-# Verifies the podspec file
-function verify_podspec() {
-    podspec_file=$1
-    echo_info "Verifying '$podspec_file'"
-    pod spec lint --allow-warnings "$podspec_file"
-}
-
 # Commit the changes
 function commit() {
     echo_info "Staging changes for commit..."
-    git add "$cartage_spec_OpenTelemetryApi" "$podspec_OpenTelemetryApi"
+    git add "$cartage_spec_OpenTelemetryApi"
 
     if [[ -z $(git status -s) ]]; then
         echo_warn "No changes detected. Nothing to commit."
         exit 0
     fi
 
-    git commit -m "chore: Update Carthage and CocoaPods release to $version"
+    git commit -m "chore: Update Carthage release to $version"
     echo_succ "Commit successful!"
 }
 
@@ -130,30 +100,13 @@ function create_pr() {
     git push origin "$branch_name"
 
     echo_info "Creating a pull request..."
-    gh pr create --title "chore: Bump Carthage & CocoaPods to $version" \
-                 --body "This PR updates Carthage and CocoaPods to version $version." \
+    gh pr create --title "chore: Bump Carthage to $version" \
+                 --body "This PR updates Carthage to version $version." \
                  --base main --head "$branch_name"
 
     echo_succ "Pull request created successfully!"
 }
 
-# Download the release artifact and compute its SHA1 checksum
-download_dir="releases/$version"
-artifact_name="OpenTelemetryApi.zip"
-
-rm -rf "$download_dir"
-mkdir -p "$download_dir"
-
-echo_info "Downloading '$version' from GitHub"
-gh release download "$version" -D "$download_dir" -p "$artifact_name"
-sha1=$(shasum -a 1 "$download_dir/$artifact_name" | awk '{print $1}')
-
-echo_succ "Downloaded '$download_dir/$artifact_name', SHA=$sha1"
-
-# Update files and verify
 update_cartage_binary_project_spec "$cartage_spec_OpenTelemetryApi" "$version"
-update_podspec "$podspec_OpenTelemetryApi" "$version" "$sha1"
-verify_podspec "$podspec_OpenTelemetryApi"
-
 commit
 create_pr
