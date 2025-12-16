@@ -13,8 +13,7 @@ import Foundation
 ///  and BaggageManager.
 ///  The telemetry objects are lazy-loaded singletons resolved via ServiceLoader mechanism.
 public struct OpenTelemetry {
-
-  public static var version = "v1.21.0"
+  public static var version = "v1.37.0"
 
   public static var instance = OpenTelemetry()
 
@@ -22,9 +21,8 @@ public struct OpenTelemetry {
   public private(set) var tracerProvider: TracerProvider
 
   /// Registered MeterProvider or default via DefaultMeterProvider.instance.
-  public private(set) var meterProvider: MeterProvider
 
-  public private(set) var stableMeterProvider: StableMeterProvider?
+  public private(set) var meterProvider: any MeterProvider
 
   /// Registered LoggerProvider or default via DefaultLoggerProvider.instance.
   public private(set) var loggerProvider: LoggerProvider
@@ -34,9 +32,8 @@ public struct OpenTelemetry {
 
   /// registered manager or default via  DefaultBaggageManager.instance.
   public private(set) var propagators: ContextPropagators =
-    DefaultContextPropagators(
-      textPropagators: [W3CTraceContextPropagator()],
-      baggagePropagator: W3CBaggagePropagator())
+    DefaultContextPropagators(textPropagators: [W3CTraceContextPropagator()],
+                              baggagePropagator: W3CBaggagePropagator())
 
   /// registered manager or default via  DefaultBaggageManager.instance.
   public private(set) var contextProvider: OpenTelemetryContextProvider
@@ -45,9 +42,8 @@ public struct OpenTelemetry {
   public private(set) var feedbackHandler: ((String) -> Void)?
 
   private init() {
-    stableMeterProvider = nil
-    tracerProvider = DefaultTracerProvider.instance
     meterProvider = DefaultMeterProvider.instance
+    tracerProvider = DefaultTracerProvider.instance
     loggerProvider = DefaultLoggerProvider.instance
     baggageManager = DefaultBaggageManager.instance
     #if canImport(os.activity)
@@ -66,19 +62,19 @@ public struct OpenTelemetry {
     #endif
   }
 
-  public static func registerStableMeterProvider(
-    meterProvider: StableMeterProvider
+  @available(*, deprecated, renamed: "registerMeterProvider")
+  public static func registerStableMeterProvider(meterProvider: any MeterProvider) {
+    Self.registerMeterProvider(meterProvider: meterProvider)
+  }
+
+  public static func registerMeterProvider(
+    meterProvider: any MeterProvider
   ) {
-    instance.stableMeterProvider = meterProvider
+    instance.meterProvider = meterProvider
   }
 
   public static func registerTracerProvider(tracerProvider: TracerProvider) {
     instance.tracerProvider = tracerProvider
-  }
-
-  @available(*, deprecated, message: "Use registerStableMeterProvider instead.")
-  public static func registerMeterProvider(meterProvider: MeterProvider) {
-    instance.meterProvider = meterProvider
   }
 
   public static func registerLoggerProvider(loggerProvider: LoggerProvider) {
@@ -89,12 +85,9 @@ public struct OpenTelemetry {
     instance.baggageManager = baggageManager
   }
 
-  public static func registerPropagators(
-    textPropagators: [TextMapPropagator],
-    baggagePropagator: TextMapBaggagePropagator
-  ) {
-    instance.propagators = DefaultContextPropagators(
-      textPropagators: textPropagators, baggagePropagator: baggagePropagator)
+  public static func registerPropagators(textPropagators: [TextMapPropagator],
+                                         baggagePropagator: TextMapBaggagePropagator) {
+    instance.propagators = DefaultContextPropagators(textPropagators: textPropagators, baggagePropagator: baggagePropagator)
   }
 
   public static func registerContextManager(contextManager: ContextManager) {
@@ -109,15 +102,13 @@ public struct OpenTelemetry {
   }
 
   /// A utility method for testing which sets the context manager for the duration of the closure, and then reverts it before the method returns
-  static func withContextManager<T>(
-    _ manager: ContextManager, _ operation: () throws -> T
-  ) rethrows -> T {
-    let old = self.instance.contextProvider.contextManager
+  static func withContextManager<T>(_ manager: ContextManager, _ operation: () throws -> T) rethrows -> T {
+    let old = instance.contextProvider.contextManager
     defer {
       self.registerContextManager(contextManager: old)
     }
 
-    self.registerContextManager(contextManager: manager)
+    registerContextManager(contextManager: manager)
 
     return try operation()
   }
