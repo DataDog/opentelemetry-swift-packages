@@ -6,7 +6,6 @@
 import Foundation
 
 public class DefaultLogger: Logger {
-
   private static let instanceWithDomain = DefaultLogger(true)
   private static let instanceNoDomain = DefaultLogger(false)
   private static let noopLogRecordBuilder = NoopLogRecordBuilder()
@@ -19,9 +18,9 @@ public class DefaultLogger: Logger {
 
   static func getInstance(_ hasDomain: Bool) -> Logger {
     if hasDomain {
-      return Self.instanceWithDomain
+      return instanceWithDomain
     } else {
-      return Self.instanceNoDomain
+      return instanceNoDomain
     }
   }
 
@@ -36,39 +35,5 @@ public class DefaultLogger: Logger {
     return Self.noopLogRecordBuilder
   }
 
-  private class NoopLogRecordBuilder: EventBuilder {
-    func setTimestamp(_ timestamp: Date) -> Self {
-      return self
-    }
-
-    func setObservedTimestamp(_ observed: Date) -> Self {
-      return self
-    }
-
-    func setSpanContext(_ context: SpanContext) -> Self {
-      return self
-    }
-
-    func setSeverity(_ severity: Severity) -> Self {
-      return self
-    }
-
-    func setBody(_ body: AttributeValue) -> Self {
-      return self
-    }
-
-    func setAttributes(_ attributes: [String: AttributeValue]) -> Self {
-      return self
-    }
-
-    func setData(_ attributes: [String: AttributeValue]) -> Self {
-      return self
-    }
-
-    func emit() {
-
-    }
-
-  }
-
+  private class NoopLogRecordBuilder: EventBuilder {}
 }

@@ -61,7 +61,7 @@ extension Status: CustomStringConvertible {
   }
 }
 
-internal struct StatusExplicitCodable: Codable {
+struct StatusExplicitCodable: Codable {
   let status: Status
 
   enum CodingKeys: String, CodingKey {
@@ -70,15 +70,13 @@ internal struct StatusExplicitCodable: Codable {
     case error
   }
 
-  enum EmptyCodingKeys: CodingKey {
-
-  }
+  enum EmptyCodingKeys: CodingKey {}
 
   enum ErrorCodingKeys: String, CodingKey {
     case description
   }
 
-  internal init(status: Status) {
+  init(status: Status) {
     self.status = status
   }
 
@@ -86,66 +84,38 @@ internal struct StatusExplicitCodable: Codable {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
     guard container.allKeys.count == 1 else {
-      let context = DecodingError.Context(
-        codingPath: container.codingPath,
-        debugDescription: "Invalid number of keys found, expected one.")
+      let context = DecodingError.Context(codingPath: container.codingPath,
+                                          debugDescription: "Invalid number of keys found, expected one.")
       throw DecodingError.typeMismatch(Status.self, context)
     }
 
     switch container.allKeys.first.unsafelyUnwrapped {
     case .ok:
-      _ = try container.nestedContainer(
-        keyedBy: EmptyCodingKeys.self, forKey: .ok)
-      self.status = .ok
+      _ = try container.nestedContainer(keyedBy: EmptyCodingKeys.self, forKey: .ok)
+      status = .ok
     case .unset:
-      _ = try container.nestedContainer(
-        keyedBy: EmptyCodingKeys.self, forKey: .unset)
-      self.status = .unset
+      _ = try container.nestedContainer(keyedBy: EmptyCodingKeys.self, forKey: .unset)
+      status = .unset
     case .error:
-      let nestedContainer = try container.nestedContainer(
-        keyedBy: ErrorCodingKeys.self, forKey: .error)
-      self.status = .error(
-        description: try nestedContainer.decode(
-          String.self, forKey: .description))
+      let nestedContainer = try container.nestedContainer(keyedBy: ErrorCodingKeys.self, forKey: .error)
+      status = try .error(
+        description: nestedContainer.decode(String.self, forKey: .description))
     }
   }
 
   public func encode(to encoder: Encoder) throws {
-
     var container = encoder.container(keyedBy: CodingKeys.self)
 
-    switch self.status {
+    switch status {
     case .ok:
       _ = container.nestedContainer(keyedBy: EmptyCodingKeys.self, forKey: .ok)
     case .unset:
-      _ = container.nestedContainer(
-        keyedBy: EmptyCodingKeys.self, forKey: .unset)
-    case .error(let description):
-      var nestedContainer = container.nestedContainer(
-        keyedBy: ErrorCodingKeys.self, forKey: .error)
+      _ = container.nestedContainer(keyedBy: EmptyCodingKeys.self, forKey: .unset)
+    case let .error(description):
+      var nestedContainer = container.nestedContainer(keyedBy: ErrorCodingKeys.self, forKey: .error)
       try nestedContainer.encode(description, forKey: .description)
     }
   }
 }
 
-#if swift(>=5.5)
-  // swift 5.5 supports synthesizing Codable for enums with associated values
-  // see https://github.com/apple/swift-evolution/blob/main/proposals/0295-codable-synthesis-for-enums-with-associated-values.md
-  extension Status: Codable {}
-#else
-  // for older swift versions use a forward compatible explicit Codable implementation
-  extension Status: Codable {
-
-    public init(from decoder: Decoder) throws {
-      let explicitDecoded = try StatusExplicitCodable(from: decoder)
-
-      self = explicitDecoded.status
-    }
-
-    public func encode(to encoder: Encoder) throws {
-      let explicitEncoded = StatusExplicitCodable(status: self)
-
-      try explicitEncoded.encode(to: encoder)
-    }
-  }
-#endif
+extension Status: Codable {}

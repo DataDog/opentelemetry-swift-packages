@@ -1,37 +1,47 @@
-/*
- * Copyright The OpenTelemetry Authors
- * SPDX-License-Identifier: Apache-2.0
- */
+//
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+//
 
 import Foundation
 
+@available(*, deprecated, renamed: "DefaultMeterProvider")
+public typealias DefaultStableMeterProvider = DefaultMeterProvider
+
 public class DefaultMeterProvider: MeterProvider {
-    public static var instance: MeterProvider = DefaultMeterProvider()
+  static let noopMeterBuilder = NoopMeterBuilder()
 
-    static var proxyMeter = ProxyMeter()
-    static var initialized = false
+  public static func noop() -> NoopMeterBuilder {
+    noopMeterBuilder
+  }
 
-    init() {}
+  public func get(name: String) -> DefaultMeter {
+    NoopMeterBuilder.noopMeter
+  }
 
-    public static func setDefault(meterFactory: MeterProvider) {
-        guard !initialized else {
-            return
-        }
-        instance = meterFactory
-        proxyMeter.updateMeter(realMeter: meterFactory.get(instrumentationName: "", instrumentationVersion: nil))
-        initialized = true
+  public func meterBuilder(name: String) -> NoopMeterBuilder {
+    Self.noop()
+  }
+
+  public class NoopMeterBuilder: MeterBuilder {
+    static let noopMeter = DefaultMeter()
+
+    public func setSchemaUrl(schemaUrl: String) -> Self {
+      self
     }
 
-    public func get(instrumentationName: String, instrumentationVersion: String? = nil) -> Meter {
-        return DefaultMeterProvider.initialized ?
-          DefaultMeterProvider.instance.get(instrumentationName: instrumentationName,
-                                            instrumentationVersion: instrumentationVersion)
-          : DefaultMeterProvider.proxyMeter
+    public func setInstrumentationVersion(instrumentationVersion: String) -> Self {
+      self
     }
 
-    internal static func reset() {
-        DefaultMeterProvider.instance = DefaultMeterProvider()
-        DefaultMeterProvider.proxyMeter = ProxyMeter()
-        DefaultMeterProvider.initialized = false
+    public func setAttributes(attributes: [String: AttributeValue]) -> Self {
+      self
     }
+
+    public func build() -> DefaultMeter {
+      Self.noopMeter
+    }
+  }
+
+  public static var instance = DefaultMeterProvider()
 }
