@@ -63,6 +63,10 @@ function build() {
         archs="arm64"
     elif [ "$platform" = "tvOS Simulator" ]; then
         archs="x86_64 arm64"
+    elif [ "$platform" = "watchOS" ]; then
+        archs="arm64_32 armv7k"
+    elif [ "$platform" = "watchOS Simulator" ]; then
+        archs="x86_64 arm64"
     elif [ "$platform" = "macOS" ]; then
         archs="x86_64 arm64"
     fi
@@ -100,6 +104,12 @@ function build() {
             ;;
         "tvOS Simulator")
             release_folder="Release-appletvsimulator"
+            ;;
+        "watchOS")
+            release_folder="Release-watchos"
+            ;;
+        "watchOS Simulator")
+            release_folder="Release-watchsimulator"
             ;;
         "macOS")
             release_folder="Release" # for some reason, the directory is not suffixed with the platform name
@@ -187,6 +197,8 @@ platforms=(
     "iOS Simulator"
     "tvOS"
     "tvOS Simulator"
+    "watchOS"
+    "watchOS Simulator"
     "macOS"
 )
 
