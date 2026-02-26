@@ -70,7 +70,7 @@ function build() {
     elif [ "$platform" = "visionOS" ]; then
         archs="arm64 arm64e"
     elif [ "$platform" = "visionOS Simulator" ]; then
-        archs="x86_64 arm64"
+        archs="arm64"
     elif [ "$platform" = "macOS" ]; then
         archs="x86_64 arm64"
     fi

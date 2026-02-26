@@ -1,0 +1,30 @@
+name: Republish
+
+permissions:
+  contents: write  # Required for creating GitHub Releases and uploading artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to republish (e.g. 1.2.3)'
+        required: true
+        type: string
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  republish:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: opentelemetry-swift-packages
+
+      - name: Republish GH Release
+        working-directory: ./opentelemetry-swift-packages
+        run: |
+          make republish-github VERSION=${{ inputs.version }}

@@ -1,4 +1,4 @@
-.PHONY: test xcframework publish-github bump-carthage-version
+.PHONY: test xcframework publish-github republish-github bump-carthage-version
 
 ECHO_TITLE=$(PWD)/scripts/utils/echo-color.sh --title
 ECHO_ERROR=$(PWD)/scripts/utils/echo-color.sh --err
@@ -24,6 +24,12 @@ publish-github:
 	@$(call require_param,VERSION)
 	@$(ECHO_TITLE) "make publish-github VERSION='$(VERSION)'"
 	./scripts/publish_github.sh --version "$(VERSION)"
+
+republish-github:
+	@$(call require_param,VERSION)
+	@$(ECHO_TITLE) "make republish-github VERSION='$(VERSION)'"
+	./scripts/build.sh --source . --target OpenTelemetryApi
+	./scripts/publish_github.sh --version "$(VERSION)" --update
 
 bump-carthage-version:
 	@$(call require_param,VERSION)
