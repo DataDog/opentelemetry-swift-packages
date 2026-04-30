@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout
@@ -37,7 +37,7 @@ jobs:
           if-no-files-found: error
 
   spm:
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout
